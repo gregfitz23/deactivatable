@@ -5,12 +5,18 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "deactivatable"
-    gem.summary = %Q{TODO: one-line summary of your gem}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.summary = %Q{Adds methods and scopes to ActiveRecord objects to allow deactivation instead of deletion.}
+    gem.description = %Q{Deactivatable provides methods and a default_scope to allow ActiveRecord objects to be deactivated instead of deleted.
+      This is useful if an object needs to be removed from general use, but it's data needs to be retained.
+      Additionally, Deactivatable provides the ability to specify dependencies which also need to be deactivated.
+      Deactivation is determined by populating a deactivated_at field with the date time at which deactivation happened.
+    }
     gem.email = "greg_fitz@yahoo.com"
     gem.homepage = "http://github.com/gregfitz23/deactivatable"
     gem.authors = ["Greg Fitzgerald"]
+    gem.add_dependency "activerecord", ">= 2.3"
     gem.add_development_dependency "thoughtbot-shoulda"
+
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
 rescue LoadError

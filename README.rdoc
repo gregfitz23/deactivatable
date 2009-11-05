@@ -1,6 +1,9 @@
 = deactivatable
 
-Description goes here.
+Deactivatable provides methods and a default_scope to allow ActiveRecord objects to be deactivated instead of deleted.
+This is useful if an object needs to be removed from general use, but it's data needs to be retained.
+Additionally, Deactivatable provides the ability to specify dependencies which also need to be deactivated.
+Deactivation is determined by populating a deactivated_at field with the date time at which deactivation happened.
 
 == Note on Patches/Pull Requests
  
