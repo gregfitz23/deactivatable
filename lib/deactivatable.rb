@@ -30,10 +30,6 @@ module ActiveRecord
           @deactivatable_options || {}
         end
         
-        def deactivated_dependencies
-          @deactivated_dependencies ||= []
-        end
-        
         # Yields to a block, executing that block after removing the deactivated_at scope.
         #
         def with_deactivated_objects_scope
