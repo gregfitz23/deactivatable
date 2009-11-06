@@ -33,6 +33,16 @@ module ActiveRecord
         def deactivated_dependencies
           @deactivated_dependencies ||= []
         end
+        
+        # Yields to a block, executing that block after removing the deactivated_at scope.
+        #
+        def with_deactivated_objects_scope
+          with_exclusive_scope do
+            with_scope(:find => {:conditions => "`#{self.table_name}`.`deactivated_at` IS NOT NULL"}) do
+              yield
+            end
+          end
+        end
       end
    
       module InstanceMethods
@@ -55,6 +65,10 @@ module ActiveRecord
             activate_dependencies
             self.save!            
           end
+        end
+        
+        def deactivated?
+          deactivated_at?
         end
                 
         private
@@ -79,15 +93,18 @@ module ActiveRecord
         end
         
         # Find the dependency indicated by *dependency_name* and execute *method* on it.
+        # Execution must be wrapped in the dependency's with_deactivated_objects_scope for activate! to work.
         #
         def execute_on_dependency(dependency_name, method)
-          dependency = self.__send__(dependency_name)
-          dependency.respond_to?(:map) ? dependency.map(&method) : dependency.__send__(method)
+          self.class.reflections[dependency_name].klass.send(:with_exclusive_scope) do
+            dependency = self.__send__(dependency_name)          
+            dependency.respond_to?(:map) ? dependency.map(&method) : dependency.__send__(method)
+          end
         end
         
         def with_transaction
           self.class.transaction do
-            yield
+             yield
           end
         end
         

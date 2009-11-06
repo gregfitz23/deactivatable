@@ -13,6 +13,14 @@ class DeactivatableTest < Test::Unit::TestCase
       assert !DeactivatableItem.exists?(@inactive_item.id)
     end
     
+    should "be findable in using the deactivated_objects_scope" do
+      assert DeactivatableItem.with_deactivated_objects_scope { DeactivatableItem.exists?(@inactive_item.id) }
+    end
+    
+    should "return true on deactivated?" do
+      assert @inactive_item.deactivated?
+    end
+    
     context "when activated" do
       setup do
         @inactive_item.activate!
