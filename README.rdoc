@@ -11,7 +11,15 @@ The deactivatable gem is hosted on GemCutter (http://gemcutter.org)
   gem install deactivatable
 OR
   config.gem 'deactivatable', :source => 'http://gemcutter.org'
-
+  
+== Usage
+* Add a deactivated_at datetime field to any table you want to be deactivatable
+    add_column :table_name, :deactivated_at, :datetime
+* Add the acts_as_deactivatable call to any class that should be deactivatable
+    Options
+      :dependencies - A list of symbols specifying any associations that are also deactivatable.  (The dependent association must separately be defined with acts_as_deactivatable).
+      :auto_configure_dependencies - true or false (default).  If set to true, any association defined as :dependent => :destroy or :dependent => :delete_all will be added to the list of dependencies to deactivate.  NOTE: This call must occur after your dependency definitions to work properly.
+ 
 == Note on Patches/Pull Requests
  
 * Fork the project.

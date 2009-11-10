@@ -11,7 +11,8 @@ module ActiveRecord
         # Define the calling class as being deactivatable.  
         # A call to this will set the default scope of the object to look for deactivated_at = nil.
         # Options
-        #   *:dependencies* => A list of symbols specifying any associations that are also deactivatable.  (This associations must separately be defined with acts_as_deactivatable).
+        #   :dependencies - A list of symbols specifying any associations that are also deactivatable.  (The dependent association must separately be defined with acts_as_deactivatable).
+        #   :auto_configure_dependencies - true or false (default).  If set to true, any association defined as :dependent => :destroy or :dependent => :delete_all will be added to the list of dependencies to deactivate.  NOTE: This call must occur after your dependency definitions to work properly.
         #
         def acts_as_deactivatable(options={})
           extend ActiveRecord::Acts::Deactivatable::ClassMethods          
@@ -20,6 +21,7 @@ module ActiveRecord
           default_scope :conditions => {:deactivated_at => nil}
           
           @deactivatable_options = options
+          setup_autoconfigured_dependencies if @deactivatable_options[:auto_configure_dependencies]
         end
         
       end
@@ -39,8 +41,25 @@ module ActiveRecord
             end
           end
         end
+
+        private
+        # Scan the reflection associations defined on the current class,
+        # if the :dependent option is set to :destroy or :delete_all then add that reflection to the list of dependencies to be deactivated.
+        #
+        def setup_autoconfigured_dependencies
+          self.reflections.each_key { |reflection_name| setup_auto_configured_dependency(reflection_name) } 
+        end
+        
+        def setup_auto_configured_dependency(reflection_name)
+          @deactivatable_options[:dependencies] ||= []
+          reflection = self.reflections[reflection_name]
+          
+          if [:destroy, :delete_all].include?(reflection.options[:dependent])
+            @deactivatable_options[:dependencies] << reflection_name
+          end          
+        end
+        
       end
-   
       module InstanceMethods
         
         # Deactivate this object, and any associated objects as specified at definition time.
