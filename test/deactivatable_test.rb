@@ -117,6 +117,30 @@ class DeactivatableTest < Test::Unit::TestCase
       should_deactivate_and_reactivate_dependencies
     end #with dependencies, @dependencies, that are dependent destroy, and with auto_configure_dependencies => true
     
+    context "with a single dependency" do
+    	setup do
+        @item.class.instance_eval { has_one :deactivatable_dependency } 
+        @item.class.instance_eval { acts_as_deactivatable :dependencies => [:deactivatable_dependency] }
+    		@dependency = DeactivatableDependency.new
+        @item.deactivatable_dependency = @dependency
+        @item.save!
+        @dependencies = [@dependency]        
+    	end
+    
+      should_deactivate_and_reactivate_dependencies
+      
+      context "that is nil" do
+      	setup do
+      		@item.deactivatable_dependency = nil
+          @item.save!
+      	end
+
+        
+       	should "not raise an exception when deactivated" do
+       	  assert_nothing_raised { @item.deactivate! }
+       	end
+      end #that is nil
+    end #with a single dependency
     
   end #An active item, @item
   

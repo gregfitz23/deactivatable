@@ -58,8 +58,9 @@ module ActiveRecord
             @deactivatable_options[:dependencies] << reflection_name
           end          
         end
-        
+
       end
+
       module InstanceMethods
         
         # Deactivate this object, and any associated objects as specified at definition time.
@@ -112,8 +113,9 @@ module ActiveRecord
         #
         def execute_on_dependency(dependency_name, method)
           self.class.reflections[dependency_name].klass.send(:with_exclusive_scope) do
-            dependency = self.__send__(dependency_name)          
-            dependency.respond_to?(:map) ? dependency.map(&method) : dependency.__send__(method)
+            if dependency = self.__send__(dependency_name)
+              dependency.respond_to?(:map) ? dependency.map(&method) : dependency.__send__(method)
+            end
           end
         end
         
