@@ -35,11 +35,19 @@ module ActiveRecord
         # Yields to a block, executing that block after removing the deactivated_at scope.
         #
         def with_deactivated_objects_scope
-          with_exclusive_scope do
+          remove_deactivated_objects_scope do
             with_scope(:find => {:conditions => "`#{self.table_name}`.`deactivated_at` IS NOT NULL"}) do
               yield
             end
           end
+        end
+        
+        # Remove any scope related to deactivated_at and yield.
+        #
+        def remove_deactivated_objects_scope          
+          with_exclusive_scope(scoped_methods_without_deactivated_at_scope) do
+            yield
+          end          
         end
 
         private
@@ -57,6 +65,10 @@ module ActiveRecord
           if [:destroy, :delete_all].include?(reflection.options[:dependent])
             @deactivatable_options[:dependencies] << reflection_name
           end          
+        end
+        
+        def scoped_methods_without_deactivated_at_scope
+          scoped_methods.reject {|m| m.values.map {|v| v.keys.first}.include?(:deactivated_at) }
         end
 
       end

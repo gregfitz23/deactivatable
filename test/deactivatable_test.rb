@@ -53,6 +53,10 @@ class DeactivatableTest < Test::Unit::TestCase
       assert @inactive_item.deactivated?
     end
     
+    should "be findable using the remove_deactivated_objects_scope" do
+      assert DeactivatableItem.remove_deactivated_objects_scope { DeactivatableItem.exists?(@inactive_item.id) }
+    end
+    
     context "when activated" do
       setup do
         @inactive_item.activate!
@@ -60,6 +64,10 @@ class DeactivatableTest < Test::Unit::TestCase
       
       should "be findable" do
         assert DeactivatableItem.exists?(@inactive_item.id)
+      end
+    
+      should "be findable using the remove_deactivated_objects_scope" do
+       assert DeactivatableItem.remove_deactivated_objects_scope { DeactivatableItem.exists?(@inactive_item.id) }
       end
     end #when reactivated    
   end #An inactive item, @inactive_item
