@@ -81,7 +81,7 @@ module ActiveRecord
           with_transaction do
             self.deactivated_at = Time.now            
             deactivate_dependencies
-            self.save!
+            self.save(false)
           end
         end
         
