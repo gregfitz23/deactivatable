@@ -18,7 +18,7 @@ module ActiveRecord
           extend ActiveRecord::Acts::Deactivatable::ClassMethods          
           include ActiveRecord::Acts::Deactivatable::InstanceMethods
                     
-          default_scope :conditions => {:deactivated_at => nil}
+          default_scope where(:deactivated_at => nil)
           
           @deactivatable_options = options
           setup_autoconfigured_dependencies if @deactivatable_options[:auto_configure_dependencies]
@@ -36,7 +36,7 @@ module ActiveRecord
         #
         def with_deactivated_objects_scope
           remove_deactivated_objects_scope do
-            with_scope(:find => {:conditions => "`#{self.table_name}`.`deactivated_at` IS NOT NULL"}) do
+            with_scope(:find => where("`#{self.table_name}`.`deactivated_at` IS NOT NULL")) do
               yield
             end
           end
@@ -44,10 +44,8 @@ module ActiveRecord
         
         # Remove any scope related to deactivated_at and yield.
         #
-        def remove_deactivated_objects_scope          
-          with_exclusive_scope(scoped_methods_without_deactivated_at_scope) do
-            yield
-          end          
+        def remove_deactivated_objects_scope
+          unscoped.where(scoped_methods_without_deactivated_at_scope)
         end
 
         private
@@ -66,9 +64,19 @@ module ActiveRecord
             @deactivatable_options[:dependencies] << reflection_name
           end          
         end
-        
+
         def scoped_methods_without_deactivated_at_scope
-          scoped_methods.reject {|m| m.values.map {|v| v.keys.first}.include?(:deactivated_at) }
+          remove_deactivated_attrs(scope_attributes)
+        end
+
+        def remove_deactivated_attrs(attrs)
+          attrs.reject do |k,v|
+            if v.is_a? Hash
+              remove_deactivated_attrs(v)
+            else
+              k == :deactivated_at
+            end
+          end
         end
 
       end
@@ -81,7 +89,7 @@ module ActiveRecord
           with_transaction do
             self.deactivated_at = Time.now            
             deactivate_dependencies
-            self.save(false)
+            self.save(:validation => false)
           end
         end
         
