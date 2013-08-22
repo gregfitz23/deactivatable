@@ -166,7 +166,22 @@ class DeactivatableTest < Test::Unit::TestCase
     end #with a single dependency
     
   end #An active item, @item
-  
+
+  # Testing whether the deactivatable_options from the parent class are being inherited in the child classes
+  context "An active deactivatable child item, @item, with some dependencies" do
+    setup do
+      # Add associations to parent class
+      DeactivatableItem.instance_eval { has_many :deactivatable_dependencies }
+      DeactivatableItem.instance_eval { acts_as_deactivatable :dependencies => [:deactivatable_dependencies] }
+
+      @item = DeactivatableItemChild.create!
+      create_item_dependencies
+    end
+
+    should_deactivate_and_reactivate_dependencies
+  end
+
+
   private
   def create_item_dependencies
     @dependencies = (0..5).map { |i| DeactivatableDependency.new({:status => i < 3 ? 1 : 2})}

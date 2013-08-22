@@ -8,6 +8,7 @@ require 'active_record'
 require 'deactivatable'
 require 'deactivatable_dependency'
 require 'deactivatable_item'
+require 'deactivatable_item_child'
 
 class Test::Unit::TestCase
   system('rm test.sqlite')

@@ -1,0 +1,2 @@
+class DeactivatableItemChild < DeactivatableItem
+end
