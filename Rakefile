@@ -14,7 +14,7 @@ begin
     gem.email = "greg_fitz@yahoo.com"
     gem.homepage = "http://github.com/gregfitz23/deactivatable"
     gem.authors = ["Greg Fitzgerald"]
-    gem.add_dependency "activerecord", ">= 2.3"
+    gem.add_dependency "active_record", ">= 3.1"
     gem.add_development_dependency "thoughtbot-shoulda"
 
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings

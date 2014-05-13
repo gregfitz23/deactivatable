@@ -124,7 +124,22 @@ class DeactivatableTest < Test::Unit::TestCase
 
       should_deactivate_and_reactivate_dependencies
     end #with dependencies, @dependencies, that are dependent destroy, and with auto_configure_dependencies => true
-    
+
+    context "with dependencies, @dependencies and chained scopes" do
+      setup do
+        @item.class.instance_eval { has_many :deactivatable_dependencies }
+        @item.class.instance_eval { acts_as_deactivatable }
+        create_item_dependencies
+      end
+
+      should 'deactivate dependencies with chained_scope' do
+        assert_equal 3, @item.deactivatable_dependencies.with_scoped_status.size
+        @item.deactivatable_dependencies.with_scoped_status.first.deactivate!
+        assert_equal 2, @item.deactivatable_dependencies.with_scoped_status.size
+        assert_equal 3, @item.deactivatable_dependencies.with_scoped_status.with_deactivated_objects_scope.size
+      end
+    end
+
     context "with a single dependency" do
     	setup do
         @item.class.instance_eval { has_one :deactivatable_dependency } 
@@ -151,10 +166,25 @@ class DeactivatableTest < Test::Unit::TestCase
     end #with a single dependency
     
   end #An active item, @item
-  
+
+  # Testing whether the deactivatable_options from the parent class are being inherited in the child classes
+  context "An active deactivatable child item, @item, with some dependencies" do
+    setup do
+      # Add associations to parent class
+      DeactivatableItem.instance_eval { has_many :deactivatable_dependencies }
+      DeactivatableItem.instance_eval { acts_as_deactivatable :dependencies => [:deactivatable_dependencies] }
+
+      @item = DeactivatableItemChild.create!
+      create_item_dependencies
+    end
+
+    should_deactivate_and_reactivate_dependencies
+  end
+
+
   private
   def create_item_dependencies
-    @dependencies = (0..5).map { DeactivatableDependency.new }
+    @dependencies = (0..5).map { |i| DeactivatableDependency.new({:status => i < 3 ? 1 : 2})}
     @item.deactivatable_dependencies = @dependencies
   end
 
