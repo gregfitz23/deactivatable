@@ -16,7 +16,7 @@ module ActiveRecord
         def acts_as_deactivatable(options={})
           include ActiveRecord::Acts::Deactivatable::InstanceMethods
 
-          default_scope where(:deactivated_at => nil)
+          default_scope {where(:deactivated_at => nil)}
 
           instance_eval <<-EOV
             def deactivatable_options
